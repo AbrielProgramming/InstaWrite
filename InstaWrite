@@ -349,7 +349,7 @@ public class InstaWrite {
 
 		public void paintComponent(Graphics g){
 			Graphics2D g2=(Graphics2D)g;
-			ImageIcon img=new ImageIcon("background image.jpg");
+			ImageIcon img=new ImageIcon("background.jpg");
 			Image backGround=img.getImage();
 			g2.drawImage(backGround, 0, 0, null);
 		}
