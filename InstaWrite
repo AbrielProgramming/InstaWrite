@@ -11,6 +11,7 @@ public class InstaWrite {
 	JScrollPane scrollPane;
 	JLabel title, premise, words, sentenceExplanation, sentenceDisplay;
 	JLabel paragraphExplanation, gameExplanation1, gameExplanation2;
+	JLabel finalWords;
 	JTextArea paragraphDisplay;
 	JButton writeSentence;
 	JButton getWords, writeParagraph;
@@ -67,6 +68,10 @@ public class InstaWrite {
 				"</center></html>", BoxLayout.X_AXIS);
 		makeLabel(paragraphExplanation);
 		
+		finalWords = new JLabel("Now you can save your paragraph and " +
+				"use it to write an entire story! Happy writing!");
+		makeLabel(finalWords);
+		
 		writeSentence = new JButton("Start Sentence");
 		makeButton(writeSentence);
 		writeSentence.addActionListener(new SentenceListener());
@@ -112,6 +117,8 @@ public class InstaWrite {
 		panel.add(writeParagraph);
 		panel.add(Box.createVerticalStrut(50));
 		panel.add(paragraphDisplay);
+		panel.add(Box.createVerticalStrut(30));
+		panel.add(finalWords);
 		panel.add(Box.createVerticalGlue());
 		panel.setBorder(BorderFactory.createLineBorder(Color.black, 20));
 		
@@ -267,6 +274,8 @@ public class InstaWrite {
 							paragraphDisplay.setText("Your paragraph: " +
 									userParagraph);
 							paragraphDisplay.setVisible(true);
+							finalWords.setVisible(true);
+
 						}
 						frame.dispose();
 					}
@@ -302,6 +311,8 @@ public class InstaWrite {
 							userParagraph = enterBox.getText();
 							paragraphDisplay.setText("Your paragraph: " +
 									userParagraph);
+							paragraphDisplay.setVisible(true);
+							finalWords.setVisible(true);
 						}
 						frame.dispose();
 					}
