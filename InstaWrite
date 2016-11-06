@@ -1,0 +1,369 @@
+import java.net.*;
+import java.io.*;
+import java.awt.event.*;
+import java.awt.*;
+import javax.swing.*;
+
+public class InstaWrite {
+	private static int MAX_WORDS = 4398;
+	JFrame frame;
+	JPanel panel;
+	JScrollPane scrollPane;
+	JLabel title, premise, words, sentenceExplanation, sentenceDisplay;
+	JLabel paragraphExplanation, gameExplanation1, gameExplanation2;
+	JTextArea paragraphDisplay;
+	JButton writeSentence;
+	JButton getWords, writeParagraph;
+	Dialog sentenceDialog, paragraphDialog;
+	private String userSentence, userParagraph;
+	
+	public InstaWrite() {
+		frame = new JFrame("InstaWrite");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		panel = new ImagePanel();
+		panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+		scrollPane = new JScrollPane(panel);
+		
+		
+		title = new JLabel("InstaWrite");
+		title.setFont(new Font("Ravie",Font.BOLD,60));
+		title.setForeground(new Color(30, 87, 36));
+		title.setAlignmentX(JFrame.CENTER_ALIGNMENT);
+		
+		premise = new JLabel("InstaWrite is a free application which allows" +
+				" you to expand your creativity to new heights!");
+		premise.setFont(new Font("Apple Chancery",Font.BOLD,20));
+		premise.setAlignmentX(JFrame.CENTER_ALIGNMENT);
+		
+		gameExplanation1 = new JLabel("Press the button below to receive " +
+				"three words, which you will use as a story prompt.");
+		gameExplanation1.setFont(new Font("Apple Chancery",Font.BOLD,20));
+		gameExplanation1.setAlignmentX(JFrame.CENTER_ALIGNMENT);
+		gameExplanation2 = new JLabel("If you don't like your words, " +
+				"simply press the button again for new ones.");
+		gameExplanation2.setFont(new Font("Apple Chancery",Font.BOLD,20));
+		gameExplanation2.setAlignmentX(JFrame.CENTER_ALIGNMENT);
+		
+		words = new JLabel("");
+		makeLabel(words);
+		
+		getWords = new JButton("Get Words!");
+		makeButton(getWords);
+		getWords.setVisible(true);
+		getWords.addActionListener(new GetWordsListener());
+		
+		sentenceExplanation = new JLabel("<html><div style='text-align:" +
+				"center;'>Now write a sentence summarizing your story, and " +
+				"don't forget to use all three words! <br>You will have 30 " +
+				"seconds once you press the button below (or press enter " + 
+				"when you are finished).</div></html>", BoxLayout.X_AXIS);
+		makeLabel(sentenceExplanation);
+		
+		paragraphExplanation = new JLabel("<html><center>Now write a " +
+				"paragraph to expand on your sentence, making it into a real" +
+				" plot!<br> You will have 5 minutes once you press the " +
+				"button below (or press enter when you are finished)." +
+				"</center></html>", BoxLayout.X_AXIS);
+		makeLabel(paragraphExplanation);
+		
+		writeSentence = new JButton("Start Sentence");
+		makeButton(writeSentence);
+		writeSentence.addActionListener(new SentenceListener());
+		
+		writeParagraph = new JButton("Start Paragraph");
+		makeButton(writeParagraph);
+		writeParagraph.addActionListener(new ParagraphListener());
+		
+		sentenceDisplay = new JLabel("");
+		makeLabel(sentenceDisplay);
+		
+		paragraphDisplay = new JTextArea("");
+		paragraphDisplay.setFont(new Font("Apple Chancery",Font.BOLD,20));
+		paragraphDisplay.setAlignmentX(JFrame.CENTER_ALIGNMENT);
+		paragraphDisplay.setForeground(new Color(179, 242, 160));
+		paragraphDisplay.setLineWrap(true);
+		paragraphDisplay.setEditable(false);
+		paragraphDisplay.setVisible(false);
+		paragraphDisplay.setSize(800, 900);
+		paragraphDisplay.setMaximumSize(new Dimension(800, 900));
+		paragraphDisplay.setBorder(
+				BorderFactory.createLineBorder(Color.BLACK, 5));
+		paragraphDisplay.setBackground(new Color(30, 87, 36, 200));
+		
+		panel.add(title);
+		panel.add(Box.createVerticalStrut(5));
+		panel.add(premise);
+		panel.add(gameExplanation1);
+		panel.add(gameExplanation2);
+		panel.add(Box.createVerticalStrut(50));
+		panel.add(getWords);
+		panel.add(Box.createVerticalStrut(50));
+		panel.add(words);
+		panel.add(Box.createVerticalStrut(50));
+		panel.add(sentenceExplanation);
+		panel.add(Box.createVerticalStrut(50));
+		panel.add(writeSentence);
+		panel.add(Box.createVerticalStrut(50));
+		panel.add(sentenceDisplay);
+		panel.add(Box.createVerticalStrut(50));
+		panel.add(paragraphExplanation);
+		panel.add(Box.createVerticalStrut(50));
+		panel.add(writeParagraph);
+		panel.add(Box.createVerticalStrut(50));
+		panel.add(paragraphDisplay);
+		panel.add(Box.createVerticalGlue());
+		panel.setBorder(BorderFactory.createLineBorder(Color.black, 20));
+		
+		frame.setContentPane(scrollPane);
+		frame.setSize(1000,800);
+		frame.setVisible(true);
+		
+		
+	}
+	
+	private void makeLabel(JLabel toMake) {
+		toMake.setFont(new Font("Apple Chancery",Font.BOLD,20));
+		toMake.setAlignmentX(JFrame.CENTER_ALIGNMENT);
+		toMake.setVisible(false);
+		toMake.setForeground(new Color(255, 229, 255));
+		toMake.setOpaque(true);
+		toMake.setBorder(
+				BorderFactory.createLineBorder(Color.BLACK));
+		toMake.setBackground(new Color(30, 87, 36, 200));
+	}
+	private void makeButton(JButton toMake) {
+		toMake.setAlignmentX(JFrame.CENTER_ALIGNMENT);
+		toMake.setForeground(new Color(255, 229, 255));
+		toMake.setBackground(Color.BLACK);
+		toMake.setFont(new Font("Apple Chancery", Font.BOLD, 20));
+		toMake.setVisible(false);
+		
+	}
+	/*
+	 * This returns three random nouns from an online database. May throw an
+	 * Input/Output exception. 
+	 */
+	private static String[] getWords() throws Exception {
+		//Stores the URL containing a large databank of nouns.
+		URL oracle = new URL(
+				"http://www.desiquintans.com/downloads/nounlist/nounlist.txt");
+		//Creates a buffer to read from.
+		BufferedReader in = new BufferedReader(
+				new InputStreamReader(oracle.openStream()));
+
+		String inputLine;
+		int i = 0, line = 0, tempPlace = 0, prev;
+		int[] temp = {-1, -1, -1};
+		String[] words = new String[3];
+		
+		//This for loop iterates three times, each time finding a random words
+		//from the list and storing it in words.
+		for (int j = 0; j < 3; j++) {
+			//If the current line the buffer is reading from is not yet at the
+			//maximum number of words, it finds another random line after that
+			//one to read from.
+			if (line < MAX_WORDS) {
+				prev = line;
+				line = (int) (Math.random() * (MAX_WORDS - prev)) + prev;
+				
+				//Checks to make sure the word has not been used before.
+				while (line == temp[0] || line == temp[1] || line == temp[2])
+					line = (int) (Math.random() * (MAX_WORDS - prev)) + prev;
+			//If the current random line is the max number of words, it
+			//starts at the beginning again, makes a new buffer, and reads
+			//another random word.
+			}else {
+				i = 0;
+				in.close();
+				in = new BufferedReader(
+						new InputStreamReader(oracle.openStream()));
+				line = (int) (Math.random() * MAX_WORDS);
+				//Checks to make sure the word has not been used before.
+				while (line == temp[0] || line == temp[1] || line == temp[2])
+					line = (int)(Math.random() * MAX_WORDS);
+			}
+			//Stores the lines that have already been used.
+			temp[tempPlace] = line;
+			tempPlace++;
+			//Moves the buffer to the current random line chosen.
+			inputLine = in.readLine();
+			prev = line;
+			while (i < line) {
+				inputLine = in.readLine();
+				i++;
+			}
+			//Stores the random word in words.
+			words[j] = inputLine;
+		}
+		in.close();
+		return words;
+	}
+	
+	private class GetWordsListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			String[] wordList;
+			try {
+				wordList = getWords();
+			} catch (Exception ex) {
+				System.out.println("I/O Failure.");
+				wordList = new String[3];
+				wordList[0] = wordList[1] = wordList[2] = "";
+			}
+			words.setText("Your words are: " + wordList[0] + ", " + wordList[1] 
+					+ ", and " + wordList[2] + ".");
+			words.setVisible(true);
+			sentenceExplanation.setVisible(true);
+			writeSentence.setVisible(true);
+		}
+	}
+	private class SentenceListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			sentenceDialog = new Dialog(0);
+		}
+	}
+	private class ParagraphListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			paragraphDialog = new Dialog(1);
+		}
+	}
+	private class Dialog{
+		JFrame frame;
+		JPanel panel;
+		JLabel timeLabel;
+		Timer timer;
+		JTextArea enterBox;
+		private int time ;
+		
+		public Dialog(int type){
+			frame = new JFrame();
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			
+			panel = new JPanel();
+			panel.setBackground(new Color(92, 255, 109));
+			panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+			
+			frame.setContentPane(panel);
+			
+			timeLabel = new JLabel("");
+			timeLabel.setAlignmentX(JFrame.LEFT_ALIGNMENT);
+			
+			enterBox = new JTextArea("");
+			enterBox.setFont(new Font("Apple Chancery", Font.BOLD, 20));
+			enterBox.setEditable(true);
+			enterBox.setAlignmentX(JFrame.LEFT_ALIGNMENT);
+			enterBox.setLineWrap(true);
+			enterBox.addKeyListener(new KeyListener() {
+				public void keyPressed(KeyEvent e) {
+					if (e.getKeyCode() == 10) {
+						if (type == 0) {
+							userSentence = enterBox.getText();
+							sentenceDisplay.setText("Your sentence: " + 
+									userSentence);
+							paragraphExplanation.setVisible(true);
+							writeParagraph.setVisible(true);
+						} else {
+							userParagraph = enterBox.getText();
+							paragraphDisplay.setText("Your paragraph: " +
+									userParagraph);
+							paragraphDisplay.setVisible(true);
+						}
+						frame.dispose();
+					}
+				}
+				public void keyTyped(KeyEvent e) {
+					
+				}
+				public void keyReleased(KeyEvent e) {
+					
+				}
+			});
+			
+			
+			if (type == 0)
+				time = 31;
+			else
+				time = (5*60) + 1;
+			
+			timer=new Timer(1000, new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					time--;
+					timeLabel.setText(timeToString(time));
+					
+					if (time == 0) {
+						timer.stop();
+						if (type == 0) {
+							userSentence = enterBox.getText();
+							sentenceDisplay.setText("Your sentence: " + 
+									userSentence);
+							paragraphExplanation.setVisible(true);
+							writeParagraph.setVisible(true);
+						} else {
+							userParagraph = enterBox.getText();
+							paragraphDisplay.setText("Your paragraph: " +
+									userParagraph);
+						}
+						frame.dispose();
+					}
+				}
+			});
+			
+			panel.add(timeLabel);
+			panel.add(enterBox);
+			
+			frame.pack();
+			if (type == 0) {
+				frame.setSize(800, 200);
+				frame.setMaximumSize(new Dimension(500, 100));
+			} else {
+				frame.setSize(800, 900);
+				frame.setMaximumSize(new Dimension(500, 600));
+			}
+			frame.setVisible(true);
+			
+			timer.start();
+		}
+		
+		private String timeToString(int intTime) {
+			int min=0;
+			String timeStr;
+			while(intTime >= 60) {
+				min++;
+				intTime-=60;
+			}
+			String minSpacer="";
+			String secSpacer="";
+			if (min<10) {
+				minSpacer="0";
+			} 
+			if (intTime<10) {
+				secSpacer="0";
+			}
+			timeStr=minSpacer+min+":"+secSpacer+intTime;
+			return timeStr;
+		}
+	}
+
+	class ImagePanel extends JPanel{
+		private static final long serialVersionUID = 1L;
+
+		public void paintComponent(Graphics g){
+			Graphics2D g2=(Graphics2D)g;
+			ImageIcon img=new ImageIcon("background image.jpg");
+			Image backGround=img.getImage();
+			g2.drawImage(backGround, 0, 0, null);
+		}
+	}
+	public static void runGUI(){
+		JFrame.setDefaultLookAndFeelDecorated(true);
+		new InstaWrite();
+	}
+	public static void main(String[] args) {
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			public void run(){
+				runGUI();
+			}
+		});
+
+	}
+}
