@@ -267,6 +267,7 @@ public class InstaWrite {
 							userSentence = enterBox.getText();
 							sentenceDisplay.setText("Your sentence: " + 
 									userSentence);
+							sentenceDisplay.setVisiblue(true);
 							paragraphExplanation.setVisible(true);
 							writeParagraph.setVisible(true);
 						} else {
@@ -305,6 +306,7 @@ public class InstaWrite {
 							userSentence = enterBox.getText();
 							sentenceDisplay.setText("Your sentence: " + 
 									userSentence);
+							sentenceDisplay.setVisible(true);
 							paragraphExplanation.setVisible(true);
 							writeParagraph.setVisible(true);
 						} else {
