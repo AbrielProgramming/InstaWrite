@@ -267,7 +267,7 @@ public class InstaWrite {
 							userSentence = enterBox.getText();
 							sentenceDisplay.setText("Your sentence: " + 
 									userSentence);
-							sentenceDisplay.setVisiblue(true);
+							sentenceDisplay.setVisible(true);
 							paragraphExplanation.setVisible(true);
 							writeParagraph.setVisible(true);
 						} else {
